@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Medicine Management - Sahaaya</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="feature-page">
+
+    <h1 id="medicineTitle">Medicine Management</h1>
+
+    <div class="form-box">
+        <input type="text" id="medName" placeholder="Medicine Name">
+        <input type="text" id="medDosage" placeholder="Dosage (e.g., 1 tablet)">
+        <input type="time" id="medTime">
+
+        <button onclick="addMedicine()" id="addMedicineBtn">
+            Add Medicine
+        </button>
+    </div>
+
+    <table id="medicineTable">
+<thead>
+<tr>
+<th>Medicine</th>
+<th>Dosage</th>
+<th>Time</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="medicineList"></tbody>
+</table>
+
+    <ul id="medicineList"></ul>
+
+ 
+
+</div>
+
+<script src="script.js"></script>
+
+<div class="bottom-home">
+    <button onclick="window.location.href='index.html'">
+        ⬅ Back to Home
+    </button>
+</div>
+
+</body>
+</html>

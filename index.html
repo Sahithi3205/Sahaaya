@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sahaaya – Care With Dignity</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Listening indicator animation */
+#listeningIndicator {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: red;
+    animation: pulse 1s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+    <div class="logo-container">
+        <img src="logo.png" alt="Sahaaya Logo">
+        <h1>Sahaaya</h1>
+    </div>
+    <div class="nav-right">
+        <div class="language-container">
+            <label data-translate="languageLabel">Language:</label>
+            <select id="languageSwitcher">
+                <option value="en">English</option>
+                <option value="hi">हिन्दी</option>
+                <option value="ta">தமிழ்</option>
+                <option value="te">తెలుగు</option>
+            </select>
+        </div>
+        <button id="modeToggle">🌙</button>
+    </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h2 id="heroTitle">Care. Comfort. Dignity.</h2>
+        <p id="heroDesc">Empowering senior citizens with safe, smart and compassionate care solutions.</p>
+        <button class="cta-btn" id="getStartedBtn">Get Started</button>
+    </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services">
+    <h2 id="servicesTitle">Our Services</h2>
+    <div class="services-grid">
+        <a href="medicine.html" class="service-link">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1587854692152-cbe660dbde88?q=80&w=1200">
+                <h3 id="service2">Medicine Management</h3>
+            </div>
+        </a>
+        <a href="reminders.html" class="service-link">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1506784365847-bbad939e9335?q=80&w=1200">
+                <h3 id="service3">Smart Reminders</h3>
+            </div>
+        </a>
+        <a href="records.html" class="service-link">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1200">
+                <h3 id="service4">Health Records</h3>
+            </div>
+        </a>
+        <a href="emergency.html" class="service-link">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1579154204601-01588f351e67?q=80&w=1200">
+                <h3 id="service5">Emergency Support</h3>
+            </div>
+        </a>
+    </div>
+    <div id="listeningIndicator"></div>
+</section>
+
+<footer>
+    © 2026 Sahaaya | Designed for Independence & Safety
+</footer>
+
+<script>
+// ================= VOICE ASSISTANT =================
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const getStartedBtn = document.getElementById("getStartedBtn");
+const listeningIndicator = document.getElementById("listeningIndicator");
+
+// Commands mapping
+const commands = {
+    en: {
+        reminders: ["open reminders","go to reminders"],
+        medicine: ["open medicine","go to medicine management"],
+        records: ["open records","go to health records"],
+        emergency: ["open emergency","help","emergency"],
+        language: ["switch to hindi","switch to tamil","switch to telugu"]
+    },
+    hi: {
+        reminders: ["रिमाइंडर खोलो","रिमाइंडर्स पेज खोलो"],
+        medicine: ["दवा पेज खोलो","औषधि खोलो"],
+        records: ["स्वास्थ्य रिकॉर्ड खोलो","रिकॉर्ड खोलो"],
+        emergency: ["आपातकाल पेज खोलो","सहायता पेज खोलो"],
+        language: ["अंग्रेज़ी पर जाओ","तमिल पर जाओ","तेलुगु पर जाओ"]
+    },
+    ta: {
+        reminders: ["நினைவூட்டல்கள் திறக்கவும்"],
+        medicine: ["மருந்து திறக்கவும்"],
+        records: ["சரித்திரங்கள் திறக்கவும்"],
+        emergency: ["அவசர திறக்கவும்"],
+        language: ["ஆங்கிலம்","இந்தி","తెలుగు"]
+    },
+    te: {
+        reminders: ["రిమైండర్స్ తెరవండి","రివైండర్ తెరవండి"],
+        medicine: ["మందులు తెరవండి","మెడిసిన్ తెరవండి"],
+        records: ["రికార్డులు తెరవండి","ఆరోగ్య రికార్డులు తెరవండి"],
+        emergency: ["అత్యవసర తెరవండి","సహాయం"],
+        language: ["ఇంగ్లీష్ కి మారించు","హింది కి మారించు","తమిళ్ కి మారించు"]
+    }
+};
+
+// Responses mapping
+const responses = {
+    en: {
+        reminders: "Opening Reminders page",
+        medicine: "Opening Medicine Management page",
+        records: "Opening Health Records page",
+        emergency: "Opening Emergency page",
+        language: "Switching language command recognized",
+        unknown: "Sorry, I did not understand that command"
+    },
+    hi: {
+        reminders: "रिमाइंडर पेज खोल रहा हूँ",
+        medicine: "दवा प्रबंधन पेज खोल रहा हूँ",
+        records: "स्वास्थ्य रिकॉर्ड पेज खोल रहा हूँ",
+        emergency: "आपातकाल पेज खोल रहा हूँ",
+        language: "भाषा बदलने का आदेश समझा गया",
+        unknown: "माफ़ करें, मैं समझ नहीं पाया"
+    },
+    ta: {
+        reminders: "நினைவூட்டல்கள் பக்கம் திறக்கப்படுகிறது",
+        medicine: "மருந்து மேலாண்மை பக்கம் திறக்கப்படுகிறது",
+        records: "மருத்துவ பதிவுகள் பக்கம் திறக்கப்படுகிறது",
+        emergency: "அவசர பக்கம் திறக்கப்படுகிறது",
+        language: "மொழி மாற்றம் கமாண்ட் புரிந்தது",
+        unknown: "மன்னிக்கவும், புரியவில்லை"
+    },
+    te: {
+        reminders: "రిమైండర్స్ పేజీ తెరవబడుతోంది",
+        medicine: "మందుల నిర్వహణ పేజీ తెరవబడుతోంది",
+        records: "ఆరోగ్య రికార్డులు పేజీ తెరవబడుతున్నాయి",
+        emergency: "అత్యవసర పేజీ తెరవబడుతోంది",
+        language: "భాష మార్చే ఆజ్ఞను గుర్తించింది",
+        unknown: "క్షమించండి, నేను అర్థం చేసుకోలేకపోయాను"
+    }
+};
+
+getStartedBtn.addEventListener("click", () => {
+    if (!SpeechRecognition) {
+        alert("Voice recognition not supported in this browser.");
+        return;
+    }
+
+    const siteLang = document.getElementById("languageSwitcher").value;
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = siteLang === "en" ? "en-US" :
+                       siteLang === "hi" ? "hi-IN" :
+                       siteLang === "ta" ? "ta-IN" :
+                       "te-IN";
+    recognition.interimResults = false;
+
+    // Show listening indicator
+    listeningIndicator.style.display = "block";
+
+    // Optional beep sound
+    const beep = new Audio("beep.mp3");
+    beep.play();
+
+    recognition.start();
+
+    recognition.onresult = (event) => {
+        listeningIndicator.style.display = "none";
+        const transcript = event.results[0][0].transcript.toLowerCase();
+        console.log("User said:", transcript);
+
+        let handled = false;
+
+        // Page commands
+        for (let key in commands[siteLang]) {
+            if (commands[siteLang][key].some(cmd => transcript.includes(cmd.toLowerCase()))) {
+                speak(responses[siteLang][key]);
+                if (["reminders","medicine","records","emergency"].includes(key)) {
+                    setTimeout(()=>{ window.location.href = key + ".html"; }, 1200);
+                }
+                handled = true;
+                break;
+            }
+        }
+
+        if (!handled) speak(responses[siteLang].unknown);
+    };
+
+    recognition.onerror = (e) => {
+        listeningIndicator.style.display = "none";
+        console.log("Voice recognition error:", e);
+    };
+});
+
+function speak(text) {
+    const siteLang = document.getElementById("languageSwitcher").value;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = siteLang === "en" ? "en-US" :
+                 siteLang === "hi" ? "hi-IN" :
+                 siteLang === "ta" ? "ta-IN" :
+                 "te-IN";
+    speechSynthesis.speak(utter);
+}
+</script>
+
+</body>
+</html>
