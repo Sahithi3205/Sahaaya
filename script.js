@@ -638,3 +638,65 @@ document.addEventListener("DOMContentLoaded", displayMedicines);
 document.addEventListener("DOMContentLoaded", displayMedicines);
 document.addEventListener("DOMContentLoaded", displayReminders);
 document.addEventListener("DOMContentLoaded", displayRecords);
+/* ================= AUTH ================= */
+
+function showSignup() {
+    document.getElementById("signupBox").style.display = "block";
+    document.getElementById("loginBox").style.display = "none";
+}
+
+function showLogin() {
+    document.getElementById("signupBox").style.display = "none";
+    document.getElementById("loginBox").style.display = "block";
+}
+
+/* SIGNUP */
+function signup() {
+    const user = {
+        name: document.getElementById("name").value,
+        phone: document.getElementById("phone").value,
+        pin: document.getElementById("pin").value,
+        role: document.getElementById("role").value
+    };
+
+    localStorage.setItem("user", JSON.stringify(user));
+    alert("Account created!");
+    showLogin();
+}
+
+/* LOGIN */
+function loginPhone() {
+    const phone = document.getElementById("loginPhone").value;
+    const pin = document.getElementById("loginPin").value;
+
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (user && phone === user.phone && pin === user.pin) {
+
+        localStorage.setItem("loggedIn", "true");
+
+        // ROLE BASED REDIRECT
+        if (user.role === "caregiver") {
+            window.location.href = "caregiver.html";
+        } else {
+            window.location.href = "index.html";
+        }
+
+    } else {
+        alert("Invalid phone or PIN");
+    }
+}
+
+/* CHECK LOGIN */
+function checkAuth() {
+    const isLoggedIn = localStorage.getItem("loggedIn");
+    if (!isLoggedIn) {
+        window.location.href = "auth.html";
+    }
+}
+
+/* LOGOUT */
+function logout() {
+    localStorage.removeItem("loggedIn");
+    window.location.href = "auth.html";
+}
