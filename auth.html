@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Sahaaya Login</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="feature-page">
+
+    <h1>Welcome to Sahaaya</h1>
+
+    <div class="auth-toggle">
+        <button onclick="showLogin()">Login</button>
+        <button onclick="showSignup()">Sign Up</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="loginBox">
+        <h3>Login with Phone</h3>
+        <input type="text" id="loginPhone" placeholder="Phone Number"><br>
+        <input type="password" id="loginPin" placeholder="4-digit PIN"><br>
+        <button onclick="loginPhone()">Login</button>
+    </div>
+
+    <!-- SIGNUP -->
+    <div id="signupBox" style="display:none;">
+        <h3>Create Account</h3>
+        <input type="text" id="name" placeholder="Full Name"><br>
+        <input type="text" id="phone" placeholder="Phone Number"><br>
+        <input type="password" id="pin" placeholder="4-digit PIN"><br>
+
+        <label>Select Role:</label><br>
+        <select id="role">
+            <option value="senior">Senior Citizen</option>
+            <option value="Guardian">Guardian</option>
+        </select><br><br>
+
+        <button onclick="signup()">Create Account</button>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
