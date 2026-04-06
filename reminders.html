@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Smart Reminders - Sahaaya</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  
+<header class="navbar">
+    <div class="logo-container">
+        <img src="logo.png" alt="Sahaaya Logo">
+        <h1>Sahaaya</h1>
+    </div>
+    <!-- Navbar -->
+
+  <div class="nav-links">  
+  <div class="nav-indicator"></div>
+
+    <a href="#servicesTitle" class = "nav-item active" onclick="scrollToServices()">Dashboard</a>
+    <a href="medicine.html" class = "nav-item">Medicines</a>
+    <a href="reminders.html" class = "nav-item">Reminders</a>
+    <a href="records.html" class ="nav-item">Records</a>
+    <a href="emergency.html" class = "nav-item">Emergency</a>
+  </div>
+
+  <div class="nav-actions">
+    <!-- Notification -->
+    <div class="notification" onclick="toggleNotifications()">
+      🔔 <span class="badge">3</span>
+    </div>
+
+    <!-- Profile -->
+    <div class="profile" onclick="toggleProfile()">
+      👤
+    </div>
+  </div>
+</div>
+
+<!-- Notification Dropdown -->
+<div id="notificationDropdown" class="dropdown hidden">
+  <p>💊 Take medicine at 8 PM</p>
+  <p>⚠️ Low stock alert</p>
+  <p>📅 Doctor appointment tomorrow</p>
+</div>
+
+<!-- Profile Dropdown -->
+<div id="profileDropdown" class="dropdown hidden">
+  <p>👤 Profile</p>
+  <p>⚙️ Settings</p>
+  <p>🚪 Logout</p>
+</div>
+    <div class="nav-right">
+        <div class="language-container">
+            <label data-translate="languageLabel">Language:</label>
+            <select id="languageSwitcher">
+                <option value="en">English</option>
+                <option value="hi">हिन्दी</option>
+                <option value="ta">தமிழ்</option>
+                <option value="te">తెలుగు</option>
+            </select>
+        </div>
+        <button id="modeToggle">🌙</button>
+    </div>
+</header>
+
+<!--  CUSTOM NOTIFICATION BOX -->
+<div id="notificationBox" class="notification-box hidden">
+  <span id="notificationText"></span>
+  <button onclick="closeNotification()">✖</button>
+</div>
+
+<div class="feature-page">
+
+<h1 id="remindersTitle">⏰ Smart Reminders</h1>
+
+<div class="form-box">
+
+<input type="text" id="reminderText" placeholder="Enter reminder" required>
+
+<input type="time" id="reminderTime" required>
+
+<button type="button" onclick="addReminder()" id="addReminderBtn">
+Add Reminder
+</button>
+
+</div>
+
+<h2>Reminder List</h2>
+
+<table id="medicineTable">
+
+<thead>
+<tr>
+<th>Reminder</th>
+<th>Time</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="reminderList">
+<tr>
+<td colspan="3">No reminders added yet</td>
+</tr>
+</tbody>
+
+</table>
+
+<div class="bottom-home">
+<button onclick="window.location.href='index.html'">
+⬅ Back to Home
+</button>
+</div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
