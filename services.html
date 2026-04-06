@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sahaaya – Care With Dignity</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Listening indicator animation */
+#listeningIndicator {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: red;
+    animation: pulse 1s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+    
+<header class="navbar">
+    <div class="logo-container">
+        <img src="logo.png" alt="Sahaaya Logo">
+        <h1>Sahaaya</h1>
+    </div>
+    <!-- Navbar -->
+
+  <div class="nav-links">  
+  <div class="nav-indicator"></div>
+
+    <a href="#servicesTitle" class = "nav-item active" onclick="scrollToServices()">Dashboard</a>
+    <a href="medicine.html" class = "nav-item">Medicines</a>
+    <a href="reminders.html" class = "nav-item">Reminders</a>
+    <a href="records.html" class ="nav-item">Records</a>
+    <a href="emergency.html" class = "nav-item">Emergency</a>
+  </div>
+
+  <div class="nav-actions">
+    <!-- Notification -->
+    <div class="notification" onclick="toggleNotifications()">
+      🔔 <span class="badge">3</span>
+    </div>
+
+    <!-- Profile -->
+    <div class="profile" onclick="toggleProfile()">
+      👤
+    </div>
+  </div>
+</div>
+
+<!-- Notification Dropdown -->
+<div id="notificationDropdown" class="dropdown hidden">
+  <p>💊 Take medicine at 8 PM</p>
+  <p>⚠️ Low stock alert</p>
+  <p>📅 Doctor appointment tomorrow</p>
+</div>
+
+<!-- Profile Dropdown -->
+<div id="profileDropdown" class="dropdown hidden">
+  <p>👤 Profile</p>
+  <p>⚙️ Settings</p>
+  <p>🚪 Logout</p>
+</div>
+    <div class="nav-right">
+        <div class="language-container">
+            <label data-translate="languageLabel">Language:</label>
+            <select id="languageSwitcher">
+                <option value="en">English</option>
+                <option value="hi">हिन्दी</option>
+                <option value="ta">தமிழ்</option>
+                <option value="te">తెలుగు</option>
+            </select>
+        </div>
+        <button id="modeToggle">🌙</button>
+    </div>
+</header>
+
+
+    <!-- SERVICES -->
+<section class="services">
+    <h2 id="servicesTitle">Our Services</h2>
+    <div class="services-grid">
+        <a href="medicine.html" class="service-link">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1587854692152-cbe660dbde88?q=80&w=1200">
+                <h3 id="service2">Medicine Management</h3>
+            </div>
+        </a>
+        <a href="reminders.html" class="service-link">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1506784365847-bbad939e9335?q=80&w=1200">
+                <h3 id="service3">Smart Reminders</h3>
+            </div>
+        </a>
+        <a href="records.html" class="service-link">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1200">
+                <h3 id="service4">Health Records</h3>
+            </div>
+        </a>
+        <a href="emergency.html" class="service-link">
+            <div class="card">
+                <img src="https://images.unsplash.com/photo-1579154204601-01588f351e67?q=80&w=1200">
+                <h3 id="service5">Emergency Support</h3>
+            </div>
+        </a>
+    </div>
+    <div id="listeningIndicator"></div>
+</section>
+</body>
+</html>
