@@ -628,3 +628,244 @@ background:#ff0000;
 50%{transform:scale(1.1);}
 100%{transform:scale(1);}
 }
+/* ================= ALARM MODAL — COMPLETE REWRITE ================= */
+/* Copy-paste this entire block into your style.css                   */
+/* replacing the old alarm section completely                         */
+
+.alarm-modal {
+    position: fixed;
+    inset: 0;                          /* top/right/bottom/left = 0 */
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #f5efe6, #e6d3b3, #b08d57);
+    z-index: 99999;                    /* highest possible */
+    display: none;                     /* JS sets to flex when alarm fires */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+
+    /* NO animation on the overlay itself — animations break pointer-events */
+}
+
+.alarm-modal.active {
+    display: flex;          /* shown when alarm triggers */
+    pointer-events: auto;   /* allow clicks inside modal */
+}
+
+/* Only animate the inner container, not the overlay */
+.alarm-container {
+    text-align: center;
+    color: white;
+    padding: 40px;
+
+    /* NO position/z-index needed here — it's inside the overlay */
+    /* NO animation — this was breaking click events */
+
+    /* pointer-events explicitly ON */
+    pointer-events: auto;
+}
+
+.alarm-clock {
+    font-size: 80px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    pointer-events: none;   /* clock text doesn't need clicks */
+}
+
+.alarm-icon {
+    font-size: 60px;
+    margin: 10px 0;
+    animation: ring 1s infinite;
+    pointer-events: none;
+}
+
+.alarm-buttons {
+    margin-top: 30px;
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    pointer-events: auto;   /* buttons ARE clickable */
+}
+
+/* Scoped only to alarm buttons — never use bare button {} */
+#snoozeBtn,
+#dismissBtn {
+    border: none;
+    padding: 15px 30px;
+    border-radius: 40px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer !important;
+    pointer-events: auto !important;   /* force clickable */
+    position: relative;
+    z-index: 1;
+    -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+    touch-action: manipulation;         /* fixes mobile tap delay */
+    transition: transform .2s;
+}
+
+#snoozeBtn {
+    background: #d4a373;
+    color: white;
+    box-shadow: 0 0 15px rgba(212,163,115,0.8);
+}
+
+#dismissBtn {
+    background: #8b5e34;
+    color: white;
+    box-shadow: 0 0 15px rgba(139,94,52,0.8);
+}
+
+#snoozeBtn:hover,
+#dismissBtn:hover {
+    transform: scale(1.1);
+}
+
+#snoozeBtn:active,
+#dismissBtn:active {
+    transform: scale(0.95);
+}
+
+/* Keep ring animation only on the icon */
+@keyframes ring {
+    0%   { transform: rotate(0deg);   }
+    25%  { transform: rotate(10deg);  }
+    50%  { transform: rotate(0deg);   }
+    75%  { transform: rotate(-10deg); }
+    100% { transform: rotate(0deg);   }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+
+/* ================= FIX: voice-box must not overlap table buttons ================= */
+/* Move it to bottom-LEFT so it doesn't cover the Action column on the right        */
+
+.voice-box {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;        /* ← LEFT not right — table action buttons are on the right */
+    right: auto;
+    width: auto;
+    z-index: 100;      /* below alarm modal (99999) */
+    text-align: left;
+}
+
+/* Add bottom padding to pages so table rows aren't hidden behind the mic button */
+.feature-page {
+    padding-bottom: 100px;
+}
+
+
+.mic-btn {
+    background-color: #8b5e3c;
+    color: white;
+    border: none;
+    padding: 16px 22px;
+    font-size: 18px;
+    border-radius: 50px;   /* round floating button */
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    font-weight: bold;
+}
+
+.mic-btn:hover {
+    background-color: #a06c45;
+}
+
+.mic-btn:active {
+    transform: scale(0.95);
+}
+
+
+
+#voiceStatus {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #333;
+}
+
+#listeningIndicator {
+    margin-top: 4px;
+    color: red;
+    font-weight: bold;
+}
+
+
+
+
+/* ================= VOICE WAVEFORM ================= */
+
+.waveform {
+    display: none;
+    margin-top: 8px;
+    height: 20px;
+}
+
+.waveform span {
+    display: inline-block;
+    width: 4px;
+    height: 100%;
+    margin: 0 2px;
+    background: #8b5e3c;
+    animation: wave 1s infinite ease-in-out;
+}
+
+.waveform span:nth-child(2) { animation-delay: 0.1s; }
+.waveform span:nth-child(3) { animation-delay: 0.2s; }
+.waveform span:nth-child(4) { animation-delay: 0.3s; }
+.waveform span:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes wave {
+    0%, 100% { transform: scaleY(0.3); }
+    50% { transform: scaleY(1); }
+}
+
+.fade-out {
+    animation: fadeOut 0.4s forwards;
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease-in;
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.delete-btn {
+    background: transparent; /* no background */
+    border: none;             /* no border */
+    color: red;               /* red ❌ */
+    font-size: 18px;          /* slightly bigger for visibility */
+    cursor: pointer;          /* show hand cursor */
+    padding: 0 5px;           /* small padding so it doesn’t shift */
+}
+
+.delete-btn:hover {
+    transform: scale(1.2);    /* slight hover effect */
+}
+
+.taken {
+    color: green;
+    font-weight: bold;
+}
