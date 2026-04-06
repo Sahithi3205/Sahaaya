@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sahaaya Provider Registration</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg,#f5f1ea,#e6d8c3);
+}
+
+.hero {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+input, select {
+    width: 100%;
+    padding: 14px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.file-box {
+    border: 2px dashed #aaa;
+    padding: 15px;
+    text-align: center;
+    border-radius: 10px;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    background: #b08b57;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.success {
+    display: none;
+    margin-top: 20px;
+    background: #e6f4ea;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.preview {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+}
+</style>
+</head>
+
+<body>
+
+<div class="hero">
+    <h1>Join Sahaaya Network</h1>
+    <p>Register as a verified healthcare provider</p>
+</div>
+
+<div class="container">
+
+    <input id="name" placeholder="Name">
+    <input id="specialization" placeholder="Specialization">
+    <input id="experience" placeholder="Experience">
+    <input id="location" placeholder="Location">
+    <input id="phone" placeholder="Phone">
+
+    <select id="type">
+        <option value="">Select Type</option>
+        <option>Doctor</option>
+        <option>Hospital</option>
+        <option>Clinic</option>
+    </select>
+
+    <div class="file-box">
+        Upload License
+        <input type="file" id="license" onchange="previewFile()">
+        <div id="filePreview" class="preview"></div>
+    </div>
+
+    <button onclick="registerDoctor()">Register</button>
+
+    <div id="successMsg" class="success">
+        ✅ Documents uploaded successfully<br><br>
+        Your profile is under review.<br>
+        You will be notified once verified.
+    </div>
+
+</div>
+
+<script>
+function previewFile() {
+    const file = document.getElementById("license").files[0];
+    if (file) {
+        document.getElementById("filePreview").innerText = "Uploaded: " + file.name;
+    }
+}
+
+function registerDoctor() {
+
+    let doctor = {
+        name: name.value,
+        specialization: specialization.value,
+        experience: experience.value,
+        location: location.value,
+        phone: phone.value,
+        type: type.value,
+        status: "Pending"
+    };
+
+    let list = JSON.parse(localStorage.getItem("doctors")) || [];
+    list.push(doctor);
+    localStorage.setItem("doctors", JSON.stringify(list));
+
+    document.getElementById("successMsg").style.display = "block";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Sahaaya | Find Care</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+<style>
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f5f1ea, #e6d8c3);
+}
+
+/* HERO */
+.hero {
+    height: 220px;
+    background: url('https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=1600') center/cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.hero h1 {
+    background: rgba(0,0,0,0.5);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-family: 'Playfair Display', serif;
+}
+
+/* MAIN */
+.container {
+    max-width: 900px;
+    margin: -40px auto 40px;
+    padding: 20px;
+}
+
+/* SEARCH */
+.search-box {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+/* MESSAGE */
+.message {
+    text-align: center;
+    padding: 12px;
+    background: #fff3cd;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* CARD */
+.card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+}
+
+.badge {
+    display: inline-block;
+    background: #2e7d32;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+/* BUTTONS */
+.btn {
+    margin-top: 10px;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.call {
+    background: #2e7d32;
+    color: white;
+}
+
+.book {
+    background: #b08b57;
+    color: white;
+}
+
+/* EMPTY */
+.empty {
+    text-align: center;
+    margin-top: 30px;
+    color: #555;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="hero">
+    <h1>Find Trusted Healthcare Providers</h1>
+</div>
+
+<div class="container">
+
+<input 
+    type="text" 
+    placeholder="Search doctors, hospitals, city..." 
+    class="search-box"
+    onkeyup="filterProviders(this.value)"
+>
+
+<div id="message" class="message"></div>
+<div id="list"></div>
+<div id="empty" class="empty"></div>
+
+</div>
+
+<script>
+
+// GET ROLE
+let role = localStorage.getItem("role");
+
+// GET DATA
+let doctors = JSON.parse(localStorage.getItem("doctors")) || [];
+
+// SHOW INFO MESSAGE (NO BLOCKING)
+if(role !== "senior" && role !== "caregiver"){
+    document.getElementById("message").innerText =
+        "⚠ View only. Login as Senior/Caregiver to interact.";
+} else {
+    document.getElementById("message").innerText =
+        "✔ Showing verified healthcare providers.";
+}
+
+// RENDER FUNCTION
+function render(data){
+
+    let container = document.getElementById("list");
+    let empty = document.getElementById("empty");
+
+    container.innerHTML = "";
+    let count = 0;
+
+    data.forEach(d => {
+
+        if(d.status !== "Verified") return;
+
+        count++;
+
+        container.innerHTML += `
+            <div class="card">
+                <h3>${d.name}</h3>
+                <span class="badge">✔ Verified</span>
+                <p>${d.type} • ${d.specialization}</p>
+                <p>📍 ${d.location}</p>
+
+                ${
+                    (role === "senior" || role === "caregiver")
+                    ? `
+                        <button class="btn call" onclick="call('${d.phone}')">📞 Call</button>
+                        <button class="btn book" onclick="book('${d.name}')">📅 Book</button>
+                      `
+                    : `<p style="color:gray;">Login as user to interact</p>`
+                }
+            </div>
+        `;
+    });
+
+    if(count === 0){
+        empty.innerText = "No verified providers found.";
+    } else {
+        empty.innerText = "";
+    }
+}
+
+// SEARCH
+function filterProviders(q){
+    q = q.toLowerCase();
+
+    let filtered = doctors.filter(d =>
+        d.name.toLowerCase().includes(q) ||
+        d.location.toLowerCase().includes(q) ||
+        d.specialization.toLowerCase().includes(q)
+    );
+
+    render(filtered);
+}
+
+// ACTIONS
+function call(num){
+    alert("Calling " + num);
+}
+
+function book(name){
+    alert("Booking request sent to " + name);
+}
+
+// INIT
+render(doctors);
+
+</script>
+
+</body>
+</html>

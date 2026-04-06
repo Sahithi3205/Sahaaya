@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>GPS Tracker - Sahaaya</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+.gps-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.location-card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.location-info {
+    margin: 15px 0;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 10px;
+}
+
+.location-info p {
+    margin: 8px 0;
+    font-size: 16px;
+}
+
+.coordinates {
+    font-family: monospace;
+    font-size: 14px;
+    color: #2c7be5;
+}
+
+.tracking-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.tracking-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.btn-start {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-start:hover:not(:disabled) {
+    background: #2ecc71;
+    transform: scale(1.02);
+}
+
+.btn-stop {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-stop:hover:not(:disabled) {
+    background: #c0392b;
+}
+
+.btn-share {
+    background: #3498db;
+    color: white;
+}
+
+.btn-share:hover:not(:disabled) {
+    background: #2980b9;
+}
+
+.location-status {
+    padding: 10px;
+    border-radius: 8px;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.status-active {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-inactive {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.location-history {
+    margin-top: 30px;
+}
+
+.history-item {
+    background: #f9f9f9;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    font-size: 14px;
+    border-left: 4px solid #b08d57;
+}
+
+.emergency-share {
+    background: #ff6b6b;
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+    text-align: center;
+    animation: pulse 2s infinite;
+}
+
+.emergency-share button {
+    background: #c0392b;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+#map {
+    height: 400px;
+    width: 100%;
+    border-radius: 10px;
+    margin-top: 20px;
+    background: #e0e0e0;
+}
+
+body.dark .location-card {
+    background: #1e1e1e;
+    color: white;
+}
+
+body.dark .location-info {
+    background: #2d2d2d;
+}
+
+body.dark .history-item {
+    background: #2d2d2d;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+</style>
+</head>
+<body>
+
+<div class="feature-page">
+    <h1>GPS Tracker</h1>
+    
+    <div class="gps-container">
+        <div class="location-card">
+            <h3>Current Location</h3>
+            <div id="locationStatus" class="location-status status-inactive">
+                Location tracking is off
+            </div>
+            
+            <div class="tracking-controls">
+                <button onclick="startTracking()" class="tracking-btn btn-start" id="startBtn">
+                    ▶ Start Tracking
+                </button>
+                <button onclick="stopTracking()" class="tracking-btn btn-stop" id="stopBtn" disabled>
+                    ⏹ Stop Tracking
+                </button>
+                <button onclick="shareLocation()" class="tracking-btn btn-share" id="shareBtn" disabled>
+                    Share Location
+                </button>
+            </div>
+            
+            <div id="locationInfo" class="location-info" style="display: none;">
+                <p><strong>Address:</strong> <span id="address">Fetching...</span></p>
+                <p><strong>Coordinates:</strong> <span id="coords" class="coordinates">-</span></p>
+                <p><strong>Last Updated:</strong> <span id="timestamp">-</span></p>
+                <p><strong>Accuracy:</strong> <span id="accuracy">-</span> meters</p>
+                <p><strong>GPS Signal:</strong> <span id="gpsSignal">-</span></p>
+            </div>
+            
+            <div id="map"></div>
+        </div>
+        
+        <div class="emergency-share" id="emergencyShare" style="display: none;">
+            <strong>Emergency Mode Active!</strong>
+            <p>Your location is being shared with caregivers every 30 seconds.</p>
+            <button onclick="stopEmergencySharing()">Stop Emergency Sharing</button>
+        </div>
+        
+        <div class="location-history">
+            <h3>Location History</h3>
+            <div id="historyList">
+                <p style="color:#999;">No location history yet</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bottom-home">
+        <button onclick="window.location.href='index.html'">⬅ Back to Home</button>
+    </div>
+</div>
+
+<script>
+// GPS Tracker Variables
+let watchId = null;
+let locationHistory = [];
+let emergencySharing = false;
+let emergencyInterval = null;
+let map = null;
+let marker = null;
+let accuracyCircle = null;
+
+// Initialize OpenStreetMap
+function initMap(lat, lng) {
+    if (map) {
+        map.setView([lat, lng], 15);
+        if (marker) {
+            marker.setLatLng([lat, lng]);
+        }
+        if (accuracyCircle) {
+            accuracyCircle.setLatLng([lat, lng]);
+        }
+        return;
+    }
+    
+    map = L.map('map').setView([lat, lng], 15);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+    
+    // Add marker
+    marker = L.marker([lat, lng]).addTo(map);
+    
+    // Add accuracy circle
+    accuracyCircle = L.circle([lat, lng], {
+        color: 'red',
+        fillColor: '#f03',
+        fillOpacity: 0.2,
+        radius: 100
+    }).addTo(map);
+    
+    // Add click handler to show coordinates
+    map.on('click', function(e) {
+        const lat = e.latlng.lat.toFixed(6);
+        const lng = e.latlng.lng.toFixed(6);
+        alert(`Coordinates: ${lat}, ${lng}\n🔗 https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}`);
+    });
+}
+
+// Update map with new location
+function updateMap(lat, lng, accuracy) {
+    if (!map) {
+        initMap(lat, lng);
+    } else {
+        map.setView([lat, lng], 15);
+        if (marker) {
+            marker.setLatLng([lat, lng]);
+        }
+        if (accuracyCircle) {
+            accuracyCircle.setLatLng([lat, lng]);
+            accuracyCircle.setRadius(accuracy);
+        }
+    }
+}
+
+// Get address from coordinates using OpenStreetMap Nominatim (Free)
+async function getAddress(lat, lng) {
+    try {
+        // Using Nominatim API with proper headers
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+            {
+                headers: {
+                    'User-Agent': 'Sahaaya-Care-App/1.0'
+                }
+            }
+        );
+        const data = await response.json();
+        
+        if (data.display_name) {
+            // Format address to be more readable
+            const address = data.display_name;
+            // Limit address length for display
+            return address.length > 100 ? address.substring(0, 100) + '...' : address;
+        }
+        return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    } catch (error) {
+        console.error("Error getting address:", error);
+        return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    }
+}
+
+// Load saved location history
+function loadLocationHistory() {
+    const saved = localStorage.getItem("locationHistory");
+    if (saved) {
+        locationHistory = JSON.parse(saved);
+        displayHistory();
+    }
+}
+
+// Save location history
+function saveLocationHistory() {
+    if (locationHistory.length > 50) {
+        locationHistory = locationHistory.slice(-50);
+    }
+    localStorage.setItem("locationHistory", JSON.stringify(locationHistory));
+    displayHistory();
+}
+
+// Display location history
+function displayHistory() {
+    const historyDiv = document.getElementById("historyList");
+    if (!historyDiv) return;
+    
+    if (locationHistory.length === 0) {
+        historyDiv.innerHTML = "<p style='color:#999;'>No location history yet</p>";
+        return;
+    }
+    
+    historyDiv.innerHTML = locationHistory.slice().reverse().map((loc, index) => `
+        <div class="history-item">
+            <strong>${new Date(loc.timestamp).toLocaleString()}</strong><br>
+            ${loc.address || 'Address unavailable'}<br>
+            ${loc.lat.toFixed(6)}, ${loc.lng.toFixed(6)}<br>
+            Accuracy: ${loc.accuracy} meters<br>
+            <a href="https://www.openstreetmap.org/?mlat=${loc.lat}&mlon=${loc.lng}" target="_blank" style="color:#2c7be5; font-size:12px;">View on OpenStreetMap →</a>
+        </div>
+    `).join("");
+}
+
+// Update UI with location data
+async function updateLocationUI(position) {
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+    const accuracy = position.coords.accuracy;
+    const timestamp = new Date(position.timestamp);
+    
+    // Update coordinates display
+    document.getElementById("coords").textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    document.getElementById("timestamp").textContent = timestamp.toLocaleString();
+    document.getElementById("accuracy").textContent = accuracy.toFixed(1);
+    
+    // Update GPS signal quality
+    let signalQuality = "Good!";
+    if (accuracy > 100) signalQuality = "Poor";
+    else if (accuracy > 50) signalQuality = "Fair";
+    document.getElementById("gpsSignal").innerHTML = signalQuality;
+    
+    // Update map
+    updateMap(lat, lng, accuracy);
+    
+    // Get and display address
+    const address = await getAddress(lat, lng);
+    document.getElementById("address").textContent = address;
+    
+    // Save to history
+    locationHistory.push({
+        lat: lat,
+        lng: lng,
+        accuracy: accuracy,
+        timestamp: position.timestamp,
+        address: address
+    });
+    saveLocationHistory();
+    
+    // If emergency sharing is active, send location to caregivers
+    if (emergencySharing) {
+        sendEmergencyLocation(lat, lng, address);
+    }
+}
+
+// Send location during emergency
+function sendEmergencyLocation(lat, lng, address) {
+    const contacts = JSON.parse(localStorage.getItem("contacts")) || [];
+    const osmLink = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}`;
+    const googleLink = `https://www.google.com/maps?q=${lat},${lng}`;
+    
+    if (contacts.length > 0) {
+        console.log(`Emergency location sent to ${contacts.length} contacts`);
+        console.log(`${address}`);
+        console.log(`OSM: ${osmLink}`);
+        console.log(`Google Maps: ${googleLink}`);
+        
+        // Store last emergency location
+        localStorage.setItem("lastEmergencyLocation", JSON.stringify({
+            lat: lat,
+            lng: lng,
+            address: address,
+            timestamp: new Date().toISOString(),
+            osmLink: osmLink,
+            googleLink: googleLink
+        }));
+        
+        // Show notification in UI
+        const statusDiv = document.getElementById("locationStatus");
+        if (statusDiv) {
+            statusDiv.innerHTML = `EMERGENCY: Location shared with ${contacts.length} contact(s) at ${new Date().toLocaleTimeString()}`;
+        }
+    }
+}
+
+// Start tracking
+function startTracking() {
+    if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser");
+        return;
+    }
+    
+    // Check permission
+    if (navigator.permissions) {
+        navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+            if (result.state === 'denied') {
+                alert("Please enable location permissions to use GPS tracking");
+                return;
+            }
+        });
+    }
+    
+    // Show loading state
+    document.getElementById("locationInfo").style.display = "block";
+    document.getElementById("locationStatus").innerHTML = "Getting your location...";
+    
+    watchId = navigator.geolocation.watchPosition(
+        async (position) => {
+            document.getElementById("locationStatus").className = "location-status status-active";
+            document.getElementById("locationStatus").innerHTML = "Tracking active • " + new Date().toLocaleTimeString();
+            await updateLocationUI(position);
+        },
+        (error) => {
+            console.error("Geolocation error:", error);
+            let errorMessage = "Unable to get location: ";
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage += "Permission denied. Please allow location access.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage += "Position unavailable. Try moving to an open area.";
+                    break;
+                case error.TIMEOUT:
+                    errorMessage += "Request timed out. Please try again.";
+                    break;
+                default:
+                    errorMessage += "Unknown error";
+            }
+            alert(errorMessage);
+            stopTracking();
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        }
+    );
+    
+    // Update button states
+    document.getElementById("startBtn").disabled = true;
+    document.getElementById("stopBtn").disabled = false;
+    document.getElementById("shareBtn").disabled = false;
+}
+
+// Stop tracking
+function stopTracking() {
+    if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+    }
+    
+    document.getElementById("locationStatus").className = "location-status status-inactive";
+    document.getElementById("locationStatus").innerHTML = "Location tracking is off";
+    document.getElementById("startBtn").disabled = false;
+    document.getElementById("stopBtn").disabled = true;
+    
+    // Stop emergency sharing if active
+    if (emergencySharing) {
+        stopEmergencySharing();
+    }
+}
+
+// Share location via WhatsApp, SMS, etc.
+function shareLocation() {
+    const lat = document.getElementById("coords").textContent.split(", ")[0];
+    const lng = document.getElementById("coords").textContent.split(", ")[1];
+    const address = document.getElementById("address").textContent;
+    
+    const osmLink = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}`;
+    const googleLink = `https://www.google.com/maps?q=${lat},${lng}`;
+    const message = `My current location: ${address}\n\n OpenStreetMap: ${osmLink}\n Google Maps: ${googleLink}`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'My Location - Sahaaya',
+            text: message,
+            url: osmLink
+        }).catch(console.error);
+    } else {
+        navigator.clipboard.writeText(message).then(() => {
+            alert("✅ Location copied to clipboard!\nYou can paste and share it now.");
+        });
+    }
+}
+
+// Start emergency sharing
+function startEmergencySharing() {
+    if (!watchId) {
+        alert("Please start location tracking first");
+        return;
+    }
+    
+    emergencySharing = true;
+    document.getElementById("emergencyShare").style.display = "block";
+    document.getElementById("locationStatus").innerHTML = "EMERGENCY SHARING ACTIVE";
+    
+    // Send location every 30 seconds during emergency
+    emergencyInterval = setInterval(() => {
+        if (watchId && emergencySharing) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const address = await getAddress(lat, lng);
+                sendEmergencyLocation(lat, lng, address);
+            });
+        }
+    }, 30000);
+    
+    // Immediately send current location
+    if (watchId) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const address = await getAddress(lat, lng);
+            sendEmergencyLocation(lat, lng, address);
+        });
+    }
+}
+
+function stopEmergencySharing() {
+    emergencySharing = false;
+    if (emergencyInterval) {
+        clearInterval(emergencyInterval);
+        emergencyInterval = null;
+    }
+    document.getElementById("emergencyShare").style.display = "none";
+}
+
+// Initialize on page load
+document.addEventListener("DOMContentLoaded", () => {
+    loadLocationHistory();
+    
+    // Initialize map with default location (India)
+    initMap(20.5937, 78.9629);
+    
+    // Check if there's an active emergency sharing from SOS
+    const emergencyLoc = localStorage.getItem("emergencyLocation");
+    if (emergencyLoc) {
+        const loc = JSON.parse(emergencyLoc);
+        startTracking();
+        setTimeout(() => {
+            startEmergencySharing();
+        }, 2000);
+    }
+});
+</script>
+<script src="script.js"></script>
+</body>
+</html>
